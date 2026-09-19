@@ -16,6 +16,8 @@ abstract class KitabuDatabase : RoomDatabase() {
 
     abstract fun bookDao(): BookDao
 
+    abstract fun bookingDao(): BookingDao
+
     companion object {
 
         @Volatile
