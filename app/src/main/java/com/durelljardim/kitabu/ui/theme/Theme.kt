@@ -1,57 +1,68 @@
 package com.durelljardim.kitabu.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = InkBlue,
+    onPrimary = PaperWhite,
+    primaryContainer = InkBlueSoft,
+    onPrimaryContainer = InkBlue,
+    secondary = InkBlue,
+    onSecondary = PaperWhite,
+    secondaryContainer = InkBlueSoft,
+    onSecondaryContainer = InkBlue,
+    background = Paper,
+    onBackground = InkText,
+    surface = Paper,
+    onSurface = InkText,
+    surfaceVariant = PaperDark,
+    onSurfaceVariant = MutedText,
+    surfaceTint = Paper,
+    outline = Hairline,
+    outlineVariant = HairlineLight,
+    surfaceContainerLowest = ContainerLowest,
+    surfaceContainerLow = ContainerLow,
+    surfaceContainer = Container,
+    surfaceContainerHigh = ContainerHigh,
+    surfaceContainerHighest = HairlineLight
+)
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val DarkColorScheme = darkColorScheme(
+    primary = InkBlueDark,
+    onPrimary = InkBlueOnDark,
+    primaryContainer = InkBlueContainerDark,
+    onPrimaryContainer = InkBlueSoft,
+    secondary = InkBlueDark,
+    onSecondary = InkBlueOnDark,
+    secondaryContainer = InkBlueContainerDark,
+    onSecondaryContainer = InkBlueSoft,
+    background = NightPaper,
+    onBackground = NightText,
+    surface = NightPaper,
+    onSurface = NightText,
+    surfaceVariant = NightPaperDark,
+    onSurfaceVariant = MutedTextDark,
+    surfaceTint = NightPaper,
+    outline = HairlineDark,
+    outlineVariant = HairlineLightDark,
+    surfaceContainerLowest = ContainerLowestDark,
+    surfaceContainerLow = ContainerLowDark,
+    surfaceContainer = ContainerDark,
+    surfaceContainerHigh = ContainerHighDark,
+    surfaceContainerHighest = HairlineLightDark
 )
 
 @Composable
 fun KitabuTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
         typography = Typography,
         content = content
     )
