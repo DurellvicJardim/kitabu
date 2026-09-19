@@ -14,6 +14,8 @@ import androidx.room.TypeConverters
 @TypeConverters(Converters::class)
 abstract class KitabuDatabase : RoomDatabase() {
 
+    abstract fun bookDao(): BookDao
+
     companion object {
 
         @Volatile
