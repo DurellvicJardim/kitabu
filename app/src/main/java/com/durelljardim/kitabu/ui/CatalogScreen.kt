@@ -16,17 +16,25 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.durelljardim.kitabu.R
 import com.durelljardim.kitabu.data.BookEntity
 import com.durelljardim.kitabu.ui.theme.AvailableBackground
 import com.durelljardim.kitabu.ui.theme.AvailableBackgroundDark
@@ -38,20 +46,18 @@ import com.durelljardim.kitabu.ui.theme.BorrowedText
 import com.durelljardim.kitabu.ui.theme.BorrowedTextDark
 
 @Composable
-fun CatalogScreen(viewModel: LibraryViewModel, modifier: Modifier = Modifier) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    CatalogList(books = uiState.books, modifier = modifier)
-}
-
-@Composable
-private fun CatalogList(books: List<BookEntity>, modifier: Modifier = Modifier) {
+fun CatalogScreen(
+    books: List<BookEntity>,
+    isFiltering: Boolean,
+    modifier: Modifier = Modifier
+) {
     if (books.isEmpty()) {
         Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "No books to show",
+                text = if (isFiltering) "No books match your search" else "No books to show",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -66,6 +72,56 @@ private fun CatalogList(books: List<BookEntity>, modifier: Modifier = Modifier) 
                 BookRow(book = book)
             }
         }
+    }
+}
+
+@Composable
+fun CatalogSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    availableOnly: Boolean,
+    onAvailableOnlyChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Column(
+        modifier = modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+    ) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            placeholder = { Text(text = "Search by title or author") },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = null
+                )
+            },
+            trailingIcon = {
+                // Only offer the clear button once something has been typed.
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = { onQueryChange("") }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Clear search"
+                        )
+                    }
+                }
+            },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(
+                onSearch = { keyboardController?.hide() }
+            )
+        )
+        FilterChip(
+            selected = availableOnly,
+            onClick = { onAvailableOnlyChange(!availableOnly) },
+            label = { Text(text = "Available only") },
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }
 
