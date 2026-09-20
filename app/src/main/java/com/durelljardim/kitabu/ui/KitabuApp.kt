@@ -1,10 +1,13 @@
 package com.durelljardim.kitabu.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -19,7 +22,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -68,11 +73,21 @@ fun KitabuApp() {
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             Column {
+                val onBookings = currentRoute == Routes.BOOKINGS
                 TopAppBar(
-                    title = {
-                        Text(
-                            text = if (currentRoute == Routes.BOOKINGS) "Your bookings" else "Kitabu"
+                    navigationIcon = {
+                        // The logo is black line art, so it is tinted to stay visible in dark mode.
+                        Image(
+                            painter = painterResource(R.drawable.logo_kitabu),
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 4.dp)
+                                .size(32.dp)
                         )
+                    },
+                    title = {
+                        Text(text = if (onBookings) "Your bookings" else "Kitabu")
                     }
                 )
                 if (currentRoute == Routes.CATALOG) {
