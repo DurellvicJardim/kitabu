@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.durelljardim.kitabu.R
 import com.durelljardim.kitabu.data.BookEntity
+import com.durelljardim.kitabu.domain.toLocalDate
 import com.durelljardim.kitabu.ui.theme.AvailableBackground
 import com.durelljardim.kitabu.ui.theme.AvailableBackgroundDark
 import com.durelljardim.kitabu.ui.theme.AvailableText
@@ -45,10 +46,14 @@ import com.durelljardim.kitabu.ui.theme.BorrowedBackground
 import com.durelljardim.kitabu.ui.theme.BorrowedBackgroundDark
 import com.durelljardim.kitabu.ui.theme.BorrowedText
 import com.durelljardim.kitabu.ui.theme.BorrowedTextDark
+import java.time.format.DateTimeFormatter
+
+private val dueBackFormatter = DateTimeFormatter.ofPattern("EEE d MMM yyyy")
 
 @Composable
 fun CatalogScreen(
     books: List<BookEntity>,
+    dueDates: Map<Int, Long>,
     isFiltering: Boolean,
     onBookClick: (BookEntity) -> Unit,
     modifier: Modifier = Modifier
@@ -71,7 +76,11 @@ fun CatalogScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(books, key = { it.bookId }) { book ->
-                BookRow(book = book, onBookClick = onBookClick)
+                BookRow(
+                    book = book,
+                    dueBack = dueDates[book.bookId],
+                    onBookClick = onBookClick
+                )
             }
         }
     }
@@ -128,7 +137,7 @@ fun CatalogSearchBar(
 }
 
 @Composable
-private fun BookRow(book: BookEntity, onBookClick: (BookEntity) -> Unit) {
+private fun BookRow(book: BookEntity, dueBack: Long?, onBookClick: (BookEntity) -> Unit) {
     OutlinedCard(
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -165,6 +174,15 @@ private fun BookRow(book: BookEntity, onBookClick: (BookEntity) -> Unit) {
                     isAvailable = book.isAvailable,
                     modifier = Modifier.padding(top = 8.dp)
                 )
+                // Telling people when a borrowed book comes back saves them a wasted trip.
+                if (!book.isAvailable && dueBack != null) {
+                    Text(
+                        text = "Due back " + dueBack.toLocalDate().format(dueBackFormatter),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
         }
     }

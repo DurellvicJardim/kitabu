@@ -168,6 +168,8 @@ fun KitabuApp() {
             composable(Routes.CATALOG) {
                 CatalogScreen(
                     books = uiState.books,
+                    // The catalog shows when a borrowed book is due back, which only the bookings know.
+                    dueDates = uiState.bookings.associate { it.bookOwnerId to it.returnDeadline },
                     isFiltering = uiState.searchQuery.isNotBlank() || uiState.availableOnly,
                     onBookClick = { selectedBook = it }
                 )
