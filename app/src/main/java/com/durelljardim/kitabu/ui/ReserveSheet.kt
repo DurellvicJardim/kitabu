@@ -2,8 +2,11 @@ package com.durelljardim.kitabu.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -65,16 +68,26 @@ fun ReserveSheet(
             modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = book.title,
-                style = MaterialTheme.typography.titleLarge,
-                fontFamily = FontFamily.Serif
-            )
-            Text(
-                text = book.author + ", " + book.category,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row {
+                BookCover(
+                    title = book.title,
+                    modifier = Modifier
+                        .width(72.dp)
+                        .height(108.dp)
+                )
+                Column(modifier = Modifier.padding(start = 12.dp)) {
+                    Text(
+                        text = book.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontFamily = FontFamily.Serif
+                    )
+                    Text(
+                        text = book.author + ", " + book.category,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
             OutlinedTextField(
                 value = name,
                 onValueChange = {
