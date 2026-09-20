@@ -43,6 +43,9 @@ object Routes {
     const val BOOKINGS = "bookings"
 }
 
+private fun countLabel(count: Int, noun: String): String =
+    if (count == 1) "1 $noun" else "$count ${noun}s"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KitabuApp() {
@@ -87,7 +90,19 @@ fun KitabuApp() {
                         )
                     },
                     title = {
-                        Text(text = if (onBookings) "Your bookings" else "Kitabu")
+                        Column {
+                            Text(text = if (onBookings) "Your bookings" else "Kitabu")
+                            // A small count under the title, so each screen says how much is on it.
+                            Text(
+                                text = if (onBookings) {
+                                    countLabel(uiState.bookings.size, "active booking")
+                                } else {
+                                    countLabel(uiState.books.size, "book")
+                                },
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 )
                 if (currentRoute == Routes.CATALOG) {
