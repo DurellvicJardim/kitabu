@@ -131,13 +131,11 @@ private fun BookingRow(
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(modifier = Modifier.padding(12.dp)) {
-            // Covers are not in the app yet, so every booking gets this plain block.
-            Box(
+            BookCover(
+                title = booking.title,
                 modifier = Modifier
                     .width(56.dp)
                     .height(84.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
             )
             Column(modifier = Modifier.padding(start = 12.dp)) {
                 Text(

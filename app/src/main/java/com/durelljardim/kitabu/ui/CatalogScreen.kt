@@ -139,13 +139,11 @@ private fun BookRow(book: BookEntity, onBookClick: (BookEntity) -> Unit) {
             .clickable(enabled = book.isAvailable) { onBookClick(book) }
     ) {
         Row(modifier = Modifier.padding(12.dp)) {
-            // There are no cover images yet, so every book gets this plain block.
-            Box(
+            BookCover(
+                title = book.title,
                 modifier = Modifier
                     .width(56.dp)
                     .height(84.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
             )
             Column(modifier = Modifier.padding(start = 12.dp)) {
                 Text(

@@ -33,6 +33,7 @@ abstract class KitabuDatabase : RoomDatabase() {
                 )
                     // While the schema is still changing, wipe and rebuild instead of migrating.
                     .fallbackToDestructiveMigration(dropAllTables = true)
+                    .addCallback(SeedCallback { getDatabase(context) })
                     .build()
                     .also { Instance = it }
             }

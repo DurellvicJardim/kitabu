@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 interface BookDao {
 
     @Insert
-    suspend fun insertBooks(books: List<BookEntity>)
+    suspend fun insertBooks(books: List<BookEntity>): List<Long>
 
     @Query("SELECT * FROM books ORDER BY title")
     fun getAllBooks(): Flow<List<BookEntity>>
