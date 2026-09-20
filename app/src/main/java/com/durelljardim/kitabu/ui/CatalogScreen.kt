@@ -2,6 +2,7 @@ package com.durelljardim.kitabu.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,7 @@ import com.durelljardim.kitabu.ui.theme.BorrowedTextDark
 fun CatalogScreen(
     books: List<BookEntity>,
     isFiltering: Boolean,
+    onBookClick: (BookEntity) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (books.isEmpty()) {
@@ -69,7 +71,7 @@ fun CatalogScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(books, key = { it.bookId }) { book ->
-                BookRow(book = book)
+                BookRow(book = book, onBookClick = onBookClick)
             }
         }
     }
@@ -126,11 +128,15 @@ fun CatalogSearchBar(
 }
 
 @Composable
-private fun BookRow(book: BookEntity) {
+private fun BookRow(book: BookEntity, onBookClick: (BookEntity) -> Unit) {
     OutlinedCard(
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        modifier = Modifier.fillMaxWidth()
+        // clickable on the modifier, not the card, so a borrowed row is not greyed out.
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(enabled = book.isAvailable) { onBookClick(book) }
     ) {
         Row(modifier = Modifier.padding(12.dp)) {
             // There are no cover images yet, so every book gets this plain block.

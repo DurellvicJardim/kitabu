@@ -72,24 +72,23 @@ class LibraryViewModel(private val repository: LibraryRepository) : ViewModel() 
         message.value = null
     }
 
-    fun reserveBook(bookId: Int, userName: String, returnDate: LocalDate?) {
+    // Returns the error text so the sheet can show it inline, or null when the booking went through.
+    fun reserveBook(bookId: Int, userName: String, returnDate: LocalDate?): String? {
         val name = userName.trim()
         if (name.isEmpty()) {
-            message.value = "Enter your name to reserve a book."
-            return
+            return "Enter your name to reserve a book."
         }
         if (returnDate == null) {
-            message.value = "Choose a return date."
-            return
+            return "Choose a return date."
         }
         if (!returnDate.isAfter(LocalDate.now())) {
-            message.value = "The return date must be tomorrow or later."
-            return
+            return "The return date must be tomorrow or later."
         }
         viewModelScope.launch {
             repository.reserveBook(bookId, name, returnDate.toEpochMillis())
             message.value = "Book reserved"
         }
+        return null
     }
 
     fun markCollected(booking: BookingWithBook) {
