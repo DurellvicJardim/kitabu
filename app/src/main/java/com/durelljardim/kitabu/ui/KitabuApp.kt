@@ -30,6 +30,8 @@ import androidx.navigation.compose.rememberNavController
 import com.durelljardim.kitabu.R
 import com.durelljardim.kitabu.data.BookEntity
 import com.durelljardim.kitabu.di.AppViewModelProvider
+import com.durelljardim.kitabu.domain.BookingWithBook
+import java.time.LocalDate
 
 object Routes {
     const val CATALOG = "catalog"
@@ -46,6 +48,8 @@ fun KitabuApp() {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     // Which book the reserve sheet is open for. Screen state, so it stays here.
     var selectedBook by remember { mutableStateOf<BookEntity?>(null) }
+    // Which booking the renew date picker is open for. Null keeps the picker hidden.
+    var bookingToRenew by remember { mutableStateOf<BookingWithBook?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState.message) {
@@ -139,7 +143,13 @@ fun KitabuApp() {
                 )
             }
             composable(Routes.BOOKINGS) {
-                DashboardScreen(bookings = uiState.bookings)
+                DashboardScreen(
+                    bookings = uiState.bookings,
+                    onCollected = viewModel::markCollected,
+                    onCancel = viewModel::cancelBooking,
+                    onReturn = viewModel::returnBook,
+                    onRenew = { bookingToRenew = it }
+                )
             }
         }
     }
@@ -151,6 +161,15 @@ fun KitabuApp() {
                 viewModel.reserveBook(book.bookId, name, date)
             },
             onDismiss = { selectedBook = null }
+        )
+    }
+
+    bookingToRenew?.let { booking ->
+        // Renew is validated in the ViewModel, so the picker only blocks past dates here.
+        KitabuDatePickerDialog(
+            earliestDate = LocalDate.now(),
+            onDateChosen = { date -> viewModel.renewBooking(booking, date) },
+            onDismiss = { bookingToRenew = null }
         )
     }
 }
