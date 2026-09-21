@@ -4,6 +4,20 @@ Kitabu is an Android app for booking books out of a library, written in Kotlin w
 
 The first screen is the catalog. Every book shows its cover, author, category and whether it is on the shelf, and you can search by title or author or narrow the list to what is available. Tapping an available book opens a sheet where you give your name and pick the date you will bring it back. A book that is already out shows the date it comes back instead, so you know when to check again. The second screen is your bookings, sorted by whatever is due first. Each one says when it was reserved, when it is due and how many days are left, with overdue items and anything due today in red. A reservation can be marked as collected or cancelled. Once it has been collected you can return the book or renew it to a later date. A reservation is refused if the name is blank, if no return date was chosen, or if that date is today or earlier. A renewal has to be later than both the current due date and today. The first two complain under the field in the sheet, the rest come back as a snackbar. The library starts with thirteen textbooks and four bookings already on the go. Those dates are worked out from the day the app first runs, so one booking is always overdue, one is due today, one still has days left and one is waiting to be collected.
 
+## Running it
+
+Clone the repository and open the folder in Android Studio, then run the `app` configuration on an emulator or a phone on Android 8.0 or newer. The Gradle wrapper fetches Gradle and the Java toolchain itself, so there is nothing to install by hand. With a device attached, `./gradlew installDebug` does the same job from a terminal. The database is created the first time the app runs, which is when the sample books and bookings are written in.
+
+## Screenshots
+
+| Browsing the catalogue | Reserving a book | The book reserved |
+| --- | --- | --- |
+| ![The catalogue, showing each book with its cover, author, category and availability](docs/screenshots/catalogue.png) | ![The reserve sheet, with a name field and a date button](docs/screenshots/reserve.png) | ![The catalogue after reserving, with the book now marked as borrowed](docs/screenshots/reserved.png) |
+
+| Your bookings | Renewing a booking | Cancelling a reservation |
+| --- | --- | --- |
+| ![The bookings screen, sorted by what is due first](docs/screenshots/bookings.png) | ![A booking with its return date moved later](docs/screenshots/renew.png) | ![The dialog asking to confirm a cancellation](docs/screenshots/cancel.png) |
+
 ## How it is put together
 
 The code sits in four packages under `com.durelljardim.kitabu`. `data` holds the tables, the queries that read and write them, the database itself and the starting data, `domain` holds the joined booking model and the date helpers, `ui` holds the screens, the shared ViewModel and the theme, and `di` holds the small container that wires everything together. Room stays inside `data` and Compose stays inside `ui`. The screens read state from a ViewModel, the ViewModel goes through a repository, and the repository is the only class that talks to the database. Nothing is injected by a library. `KitabuApplication` builds an `AppContainer`, which creates the database and the repository, and `AppViewModelProvider` passes that repository to the ViewModel.
