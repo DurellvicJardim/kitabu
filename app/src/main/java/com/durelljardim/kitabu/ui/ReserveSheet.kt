@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -105,6 +106,20 @@ fun ReserveSheet(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+            // Quick options for the common loan lengths, so the usual ones are one tap away.
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(Pair(1L, "1 day"), Pair(3L, "3 days"), Pair(7L, "1 week")).forEach { option ->
+                    FilterChip(
+                        // Derived from returnDate, so picking any other date in the picker unselects all three.
+                        selected = returnDate == LocalDate.now().plusDays(option.first),
+                        onClick = {
+                            returnDate = LocalDate.now().plusDays(option.first)
+                            errorMessage = null
+                        },
+                        label = { Text(text = option.second) }
+                    )
+                }
+            }
             OutlinedButton(
                 onClick = { showDatePicker = true },
                 modifier = Modifier.fillMaxWidth()
