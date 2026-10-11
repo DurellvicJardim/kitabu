@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 
 class SeedCallback(private val databaseProvider: () -> KitabuDatabase) : RoomDatabase.Callback() {
 
-    // onCreate runs before the database instance exists, so seeding waits for it off the main thread.
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate(db: SupportSQLiteDatabase) {
@@ -37,7 +36,6 @@ class SeedCallback(private val databaseProvider: () -> KitabuDatabase) : RoomDat
             BookEntity(title = "Statistics for Business and Economics", author = "Anderson, Sweeney & Williams", category = "Statistics"),
             BookEntity(title = "Research Methods for Business Students", author = "Saunders, Lewis & Thornhill", category = "Research")
         )
-        // The ids come back in list order, so each booking can point at its own book without guessing.
         val ids = database.bookDao().insertBooks(books)
 
         val today = LocalDate.now()

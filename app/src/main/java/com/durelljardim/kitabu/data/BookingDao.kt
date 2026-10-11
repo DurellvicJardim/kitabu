@@ -13,7 +13,6 @@ interface BookingDao {
     @Insert
     suspend fun insertBooking(booking: BookingEntity)
 
-    // Lives here because it must run inside the same transactions as the booking changes.
     @Query("UPDATE books SET isAvailable = :isAvailable WHERE bookId = :bookId")
     suspend fun updateBookAvailability(bookId: Int, isAvailable: Boolean)
 
@@ -39,7 +38,6 @@ interface BookingDao {
     )
     fun getActiveBookings(): Flow<List<BookingWithBook>>
 
-    // Reserve, cancel and return each touch both tables, so they run as one transaction.
     @Transaction
     suspend fun reserveBook(booking: BookingEntity) {
         insertBooking(booking)

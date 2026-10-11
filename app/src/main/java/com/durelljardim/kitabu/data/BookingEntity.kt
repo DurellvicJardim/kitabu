@@ -5,7 +5,6 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-// Deleting a book also deletes its bookings.
 @Entity(
     tableName = "bookings",
     foreignKeys = [
@@ -16,7 +15,6 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    // Without this index, joining a booking to its book means a full table scan.
     indices = [Index("bookOwnerId")]
 )
 data class BookingEntity(

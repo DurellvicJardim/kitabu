@@ -1,29 +1,39 @@
 package com.durelljardim.kitabu.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,6 +46,8 @@ import com.durelljardim.kitabu.R
 import com.durelljardim.kitabu.data.BookEntity
 import com.durelljardim.kitabu.di.AppViewModelProvider
 import com.durelljardim.kitabu.domain.BookingWithBook
+import com.durelljardim.kitabu.ui.theme.HeaderBlack
+import com.durelljardim.kitabu.ui.theme.Mustard
 import java.time.LocalDate
 
 object Routes {
@@ -50,13 +62,9 @@ private fun countLabel(count: Int, noun: String): String =
 @Composable
 fun KitabuApp() {
     val navController = rememberNavController()
-    // One ViewModel shared by both screens, so they read the same database observers.
     val viewModel: LibraryViewModel = viewModel(factory = AppViewModelProvider.Factory)
-    // State is collected once here and passed down, so the screens hold no state.
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    // Which book the reserve sheet is open for. Screen state, so it stays here.
     var selectedBook by remember { mutableStateOf<BookEntity?>(null) }
-    // Which booking the renew date picker is open for. Null keeps the picker hidden.
     var bookingToRenew by remember { mutableStateOf<BookingWithBook?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -71,6 +79,16 @@ fun KitabuApp() {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
+    val goToTab: (String) -> Unit = { route ->
+        navController.navigate(route) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -78,12 +96,15 @@ fun KitabuApp() {
             Column {
                 val onBookings = currentRoute == Routes.BOOKINGS
                 TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = HeaderBlack,
+                        titleContentColor = Color.White
+                    ),
                     navigationIcon = {
-                        // The logo is black line art, so it is tinted to stay visible in dark mode.
                         Image(
                             painter = painterResource(R.drawable.logo_kitabu),
                             contentDescription = null,
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                            colorFilter = ColorFilter.tint(Color.White),
                             modifier = Modifier
                                 .padding(start = 16.dp, end = 4.dp)
                                 .size(32.dp)
@@ -91,8 +112,10 @@ fun KitabuApp() {
                     },
                     title = {
                         Column {
-                            Text(text = if (onBookings) "Your bookings" else "Kitabu")
-                            // A small count under the title, so each screen says how much is on it.
+                            Text(
+                                text = if (onBookings) "Your bookings" else "KITABU",
+                                fontWeight = FontWeight.Medium
+                            )
                             Text(
                                 text = if (onBookings) {
                                     countLabel(uiState.bookings.size, "active booking")
@@ -100,7 +123,7 @@ fun KitabuApp() {
                                     countLabel(uiState.books.size, "book")
                                 },
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = Mustard
                             )
                         }
                     }
@@ -115,47 +138,19 @@ fun KitabuApp() {
                 }
             }
         },
-
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
+            Row(modifier = Modifier.fillMaxWidth()) {
+                BottomTab(
+                    label = "Catalog",
                     selected = currentRoute == Routes.CATALOG,
-                    onClick = {
-                        navController.navigate(Routes.CATALOG) {
-                            // Backing out of a tab goes to the first screen instead of stacking copies.
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_book),
-                            contentDescription = null
-                        )
-                    },
-                    label = { Text(text = "Catalog") }
+                    onClick = { goToTab(Routes.CATALOG) },
+                    modifier = Modifier.weight(1f)
                 )
-                NavigationBarItem(
+                BottomTab(
+                    label = "Bookings",
                     selected = currentRoute == Routes.BOOKINGS,
-                    onClick = {
-                        navController.navigate(Routes.BOOKINGS) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_calendar),
-                            contentDescription = null
-                        )
-                    },
-                    label = { Text(text = "Bookings") }
+                    onClick = { goToTab(Routes.BOOKINGS) },
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -168,7 +163,6 @@ fun KitabuApp() {
             composable(Routes.CATALOG) {
                 CatalogScreen(
                     books = uiState.books,
-                    // The catalog shows when a borrowed book is due back, which only the bookings know.
                     dueDates = uiState.bookings.associate { it.bookOwnerId to it.returnDeadline },
                     isFiltering = uiState.searchQuery.isNotBlank() || uiState.availableOnly,
                     onBookClick = { selectedBook = it }
@@ -197,11 +191,34 @@ fun KitabuApp() {
     }
 
     bookingToRenew?.let { booking ->
-        // Renew is validated in the ViewModel, so the picker only blocks past dates here.
         KitabuDatePickerDialog(
             earliestDate = LocalDate.now(),
             onDateChosen = { date -> viewModel.renewBooking(booking, date) },
             onDismiss = { bookingToRenew = null }
+        )
+    }
+}
+
+@Composable
+private fun BottomTab(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .background(if (selected) Mustard else HeaderBlack)
+            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(vertical = 14.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = if (selected) HeaderBlack else Color.White
         )
     }
 }

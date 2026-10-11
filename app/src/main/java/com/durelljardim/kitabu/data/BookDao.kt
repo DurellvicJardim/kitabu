@@ -17,7 +17,6 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE isAvailable = 1 ORDER BY title")
     fun getAvailableBooks(): Flow<List<BookEntity>>
 
-    // The || joins the query to the % so the search matches anywhere in the text.
     @Query("SELECT * FROM books WHERE title LIKE '%' || :query || '%' OR author LIKE '%' || :query || '%' ORDER BY title")
     fun searchBooks(query: String): Flow<List<BookEntity>>
 }

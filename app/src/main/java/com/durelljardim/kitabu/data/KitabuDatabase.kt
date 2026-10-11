@@ -24,14 +24,12 @@ abstract class KitabuDatabase : RoomDatabase() {
         private var Instance: KitabuDatabase? = null
 
         fun getDatabase(context: Context): KitabuDatabase {
-            // Only one thread may create the database, and only once.
             return Instance ?: synchronized(this) {
                 Instance ?: Room.databaseBuilder(
                     context.applicationContext,
                     KitabuDatabase::class.java,
                     "kitabu_database"
                 )
-                    // While the schema is still changing, wipe and rebuild instead of migrating.
                     .fallbackToDestructiveMigration(dropAllTables = true)
                     .addCallback(SeedCallback { getDatabase(context) })
                     .build()

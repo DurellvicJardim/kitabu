@@ -2,7 +2,6 @@ package com.durelljardim.kitabu.domain
 
 import com.durelljardim.kitabu.data.BookingStatus
 
-// Not an entity. This holds the joined booking and book row for the dashboard.
 data class BookingWithBook(
     val bookingId: Int,
     val bookOwnerId: Int,

@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -25,7 +27,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.durelljardim.kitabu.R
 import com.durelljardim.kitabu.data.BookEntity
@@ -63,10 +66,11 @@ fun ReserveSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState
+        sheetState = sheetState,
+        dragHandle = null
     ) {
         Column(
-            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+            modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row {
@@ -80,7 +84,7 @@ fun ReserveSheet(
                     Text(
                         text = book.title,
                         style = MaterialTheme.typography.titleLarge,
-                        fontFamily = FontFamily.Serif
+                        fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = book.author + ", " + book.category,
@@ -98,6 +102,7 @@ fun ReserveSheet(
                 },
                 label = { Text(text = "Your name") },
                 singleLine = true,
+                shape = RectangleShape,
                 isError = nameError,
                 supportingText = {
                     if (nameError) {
@@ -106,22 +111,43 @@ fun ReserveSheet(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
-            // Quick options for the common loan lengths, so the usual ones are one tap away.
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(Pair(1L, "1 day"), Pair(3L, "3 days"), Pair(7L, "1 week")).forEach { option ->
-                    FilterChip(
-                        // Derived from returnDate, so picking any other date in the picker unselects all three.
-                        selected = returnDate == LocalDate.now().plusDays(option.first),
-                        onClick = {
-                            returnDate = LocalDate.now().plusDays(option.first)
-                            errorMessage = null
-                        },
-                        label = { Text(text = option.second) }
-                    )
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Return in",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    listOf(Pair(1L, "1 day"), Pair(3L, "3 days"), Pair(7L, "1 week")).forEach { option ->
+                        FilterChip(
+                            selected = returnDate == LocalDate.now().plusDays(option.first),
+                            onClick = {
+                                returnDate = LocalDate.now().plusDays(option.first)
+                                errorMessage = null
+                            },
+                            label = {
+                                Text(
+                                    text = option.second,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            },
+                            shape = RectangleShape,
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.inverseSurface,
+                                selectedLabelColor = MaterialTheme.colorScheme.inverseOnSurface
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
             OutlinedButton(
                 onClick = { showDatePicker = true },
+                shape = RectangleShape,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
@@ -151,15 +177,14 @@ fun ReserveSheet(
                 onClick = {
                     val error = onReserve(name, returnDate)
                     if (error == null) {
-                        // Slide the sheet away before the book is cleared, so it does not just vanish.
                         scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() }
                     } else if (name.isBlank()) {
-                        // The name field shows its own error, so do not repeat it above the button.
                         nameError = true
                     } else {
                         errorMessage = error
                     }
                 },
+                shape = RectangleShape,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Reserve")
@@ -167,4 +192,3 @@ fun ReserveSheet(
         }
     }
 }
-

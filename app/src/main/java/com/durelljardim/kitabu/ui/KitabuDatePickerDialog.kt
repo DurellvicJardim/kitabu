@@ -1,5 +1,6 @@
 package com.durelljardim.kitabu.ui
 
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,7 +23,6 @@ fun KitabuDatePickerDialog(
     val datePickerState = rememberDatePickerState(
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                // The picker works in UTC milliseconds, so convert with UTC both ways.
                 val date = Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC).toLocalDate()
                 return date.isAfter(earliestDate)
             }
@@ -44,13 +44,14 @@ fun KitabuDatePickerDialog(
                         )
                     }
                     onDismiss()
-                }
+                },
+                shape = RectangleShape
             ) {
                 Text(text = "OK")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = onDismiss, shape = RectangleShape) {
                 Text(text = "Cancel")
             }
         }

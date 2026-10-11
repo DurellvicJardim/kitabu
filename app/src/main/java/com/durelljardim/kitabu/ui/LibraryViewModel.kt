@@ -24,7 +24,6 @@ class LibraryViewModel(private val repository: LibraryRepository) : ViewModel() 
     private val availableOnly = MutableStateFlow(false)
     private val message = MutableStateFlow<String?>(null)
 
-    // Whenever the query or the filter changes, run the matching database query again.
     @OptIn(ExperimentalCoroutinesApi::class)
     private val books = combine(searchQuery, availableOnly) { query, onlyAvailable ->
         Pair(query, onlyAvailable)
@@ -32,7 +31,6 @@ class LibraryViewModel(private val repository: LibraryRepository) : ViewModel() 
         if (query.isBlank()) {
             if (onlyAvailable) repository.getAvailableBooks() else repository.getAllBooks()
         } else if (onlyAvailable) {
-            // The search query has no availability filter, so drop borrowed books here.
             repository.searchBooks(query.trim()).map { list -> list.filter { it.isAvailable } }
         } else {
             repository.searchBooks(query.trim())
@@ -67,12 +65,10 @@ class LibraryViewModel(private val repository: LibraryRepository) : ViewModel() 
         availableOnly.value = value
     }
 
-    // Called after the snackbar has shown the message so it does not repeat.
     fun messageShown() {
         message.value = null
     }
 
-    // Returns the error text so the sheet can show it inline, or null when the booking went through.
     fun reserveBook(bookId: Int, userName: String, returnDate: LocalDate?): String? {
         val name = userName.trim()
         if (name.isEmpty()) {

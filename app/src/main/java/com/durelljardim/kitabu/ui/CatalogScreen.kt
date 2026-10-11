@@ -3,7 +3,6 @@ package com.durelljardim.kitabu.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,10 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,23 +29,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.durelljardim.kitabu.R
 import com.durelljardim.kitabu.data.BookEntity
 import com.durelljardim.kitabu.domain.toLocalDate
-import com.durelljardim.kitabu.ui.theme.AvailableBackground
-import com.durelljardim.kitabu.ui.theme.AvailableBackgroundDark
-import com.durelljardim.kitabu.ui.theme.AvailableText
-import com.durelljardim.kitabu.ui.theme.AvailableTextDark
-import com.durelljardim.kitabu.ui.theme.BorrowedBackground
-import com.durelljardim.kitabu.ui.theme.BorrowedBackgroundDark
-import com.durelljardim.kitabu.ui.theme.BorrowedText
-import com.durelljardim.kitabu.ui.theme.BorrowedTextDark
+import com.durelljardim.kitabu.ui.theme.BurntOrange
+import com.durelljardim.kitabu.ui.theme.ForestGreen
 import java.time.format.DateTimeFormatter
 
 private val dueBackFormatter = DateTimeFormatter.ofPattern("EEE d MMM yyyy")
@@ -96,14 +91,14 @@ fun CatalogSearchBar(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
-        modifier = modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+        modifier = modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp)
     ) {
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            shape = RoundedCornerShape(12.dp),
+            shape = RectangleShape,
             placeholder = { Text(text = "Search by title or author") },
             leadingIcon = {
                 Icon(
@@ -112,7 +107,6 @@ fun CatalogSearchBar(
                 )
             },
             trailingIcon = {
-                // Only offer the clear button once something has been typed.
                 if (query.isNotEmpty()) {
                     IconButton(onClick = { onQueryChange("") }) {
                         Icon(
@@ -127,24 +121,27 @@ fun CatalogSearchBar(
                 onSearch = { keyboardController?.hide() }
             )
         )
-        FilterChip(
-            selected = availableOnly,
-            onClick = { onAvailableOnlyChange(!availableOnly) },
-            label = { Text(text = "Available only") },
-            modifier = Modifier.padding(top = 8.dp)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.toggleable(
+                value = availableOnly,
+                role = Role.Checkbox,
+                onValueChange = onAvailableOnlyChange
+            )
+        ) {
+            Checkbox(checked = availableOnly, onCheckedChange = null, modifier = Modifier.padding(12.dp))
+            Text(text = "Available only", style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
 
 @Composable
 private fun BookRow(book: BookEntity, dueBack: Long?, onBookClick: (BookEntity) -> Unit) {
     OutlinedCard(
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        // clickable on the modifier, not the card, so a borrowed row is not greyed out.
+        shape = RectangleShape,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
             .clickable(enabled = book.isAvailable) { onBookClick(book) }
     ) {
         Row(modifier = Modifier.padding(12.dp)) {
@@ -157,8 +154,7 @@ private fun BookRow(book: BookEntity, dueBack: Long?, onBookClick: (BookEntity) 
             Column(modifier = Modifier.padding(start = 12.dp)) {
                 Text(
                     text = book.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily.Serif
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Text(
                     text = book.author,
@@ -167,21 +163,22 @@ private fun BookRow(book: BookEntity, dueBack: Long?, onBookClick: (BookEntity) 
                 )
                 Text(
                     text = book.category,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                StatusBadge(
-                    isAvailable = book.isAvailable,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(top = 8.dp)
-                )
-                // Telling people when a borrowed book comes back saves them a wasted trip.
-                if (!book.isAvailable && dueBack != null) {
-                    Text(
-                        text = "Due back " + dueBack.toLocalDate().format(dueBackFormatter),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                ) {
+                    StatusBadge(isAvailable = book.isAvailable)
+                    if (!book.isAvailable && dueBack != null) {
+                        Text(
+                            text = "Due back " + dueBack.toLocalDate().format(dueBackFormatter),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
                 }
             }
         }
@@ -190,26 +187,13 @@ private fun BookRow(book: BookEntity, dueBack: Long?, onBookClick: (BookEntity) 
 
 @Composable
 private fun StatusBadge(isAvailable: Boolean, modifier: Modifier = Modifier) {
-    val darkTheme = isSystemInDarkTheme()
-    val textColor = when {
-        isAvailable && darkTheme -> AvailableTextDark
-        isAvailable -> AvailableText
-        darkTheme -> BorrowedTextDark
-        else -> BorrowedText
-    }
-    val backgroundColor = when {
-        isAvailable && darkTheme -> AvailableBackgroundDark
-        isAvailable -> AvailableBackground
-        darkTheme -> BorrowedBackgroundDark
-        else -> BorrowedBackground
-    }
     Text(
         text = if (isAvailable) "Available" else "Borrowed",
         style = MaterialTheme.typography.labelMedium,
-        color = textColor,
+        fontWeight = FontWeight.Medium,
+        color = Color.White,
         modifier = modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(backgroundColor)
+            .background(if (isAvailable) ForestGreen else BurntOrange)
             .padding(horizontal = 8.dp, vertical = 2.dp)
     )
 }

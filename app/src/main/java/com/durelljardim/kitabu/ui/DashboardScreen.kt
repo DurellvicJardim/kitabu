@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,13 +30,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.durelljardim.kitabu.data.BookingStatus
 import com.durelljardim.kitabu.domain.BookingWithBook
 import com.durelljardim.kitabu.domain.daysUntil
 import com.durelljardim.kitabu.domain.toLocalDate
+import com.durelljardim.kitabu.ui.theme.LabelGrey
 import java.time.format.DateTimeFormatter
 
 private val reservedDateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy")
@@ -110,6 +110,7 @@ private fun BookingRow(
                         showCancelDialog = false
                         onCancel()
                     },
+                    shape = RectangleShape,
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
                     )
@@ -118,7 +119,7 @@ private fun BookingRow(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showCancelDialog = false }) {
+                TextButton(onClick = { showCancelDialog = false }, shape = RectangleShape) {
                     Text(text = "Keep it")
                 }
             }
@@ -126,8 +127,8 @@ private fun BookingRow(
     }
 
     OutlinedCard(
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        shape = RectangleShape,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(modifier = Modifier.padding(12.dp)) {
@@ -140,8 +141,7 @@ private fun BookingRow(
             Column(modifier = Modifier.padding(start = 12.dp)) {
                 Text(
                     text = booking.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily.Serif
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Text(
                     text = booking.author,
@@ -150,12 +150,12 @@ private fun BookingRow(
                 )
                 Text(
                     text = "Reserved " + booking.bookingDate.toLocalDate().format(reservedDateFormatter),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "Due " + booking.returnDeadline.toLocalDate().format(dueDateFormatter),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Row(
@@ -172,24 +172,25 @@ private fun BookingRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(top = 8.dp)
                 ) {
-                    // Only PENDING and ACTIVE reach this screen, so no other status needs buttons.
                     if (booking.status == BookingStatus.PENDING) {
-                        Button(onClick = onCollected) {
+                        Button(onClick = onCollected, shape = RectangleShape) {
                             Text(text = "Collected")
                         }
-                        TextButton(
+                        OutlinedButton(
                             onClick = { showCancelDialog = true },
-                            colors = ButtonDefaults.textButtonColors(
+                            shape = RectangleShape,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+                            colors = ButtonDefaults.outlinedButtonColors(
                                 contentColor = MaterialTheme.colorScheme.error
                             )
                         ) {
                             Text(text = "Cancel")
                         }
                     } else {
-                        Button(onClick = onReturn) {
+                        Button(onClick = onReturn, shape = RectangleShape) {
                             Text(text = "Return")
                         }
-                        OutlinedButton(onClick = onRenew) {
+                        OutlinedButton(onClick = onRenew, shape = RectangleShape) {
                             Text(text = "Renew")
                         }
                     }
@@ -204,10 +205,9 @@ private fun StatusLabel(status: BookingStatus) {
     Text(
         text = if (status == BookingStatus.PENDING) "Reserved" else "On loan",
         style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = Color.White,
         modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(LabelGrey)
             .padding(horizontal = 8.dp, vertical = 2.dp)
     )
 }
@@ -225,7 +225,6 @@ private fun DaysLeftLabel(deadlineMillis: Long, modifier: Modifier = Modifier) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,
-        // Overdue and due today stand out in red, the rest stay plain.
         color = if (days <= 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         modifier = modifier
     )

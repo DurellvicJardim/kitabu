@@ -3,40 +3,30 @@ package com.durelljardim.kitabu.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import com.durelljardim.kitabu.R
 
 @Composable
 fun BookCover(title: String, modifier: Modifier = Modifier) {
     val cover = coverFor(title)
     if (cover == null) {
-        // A book with no cover image still needs something the same size in the row.
         Box(
-            modifier = modifier
-                .clip(RoundedCornerShape(4.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+            modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant)
         )
     } else {
-        // Fit keeps the whole cover visible, since the images are not all the same shape.
         Image(
             painter = painterResource(cover),
             contentDescription = null,
             contentScale = ContentScale.Fit,
-            modifier = modifier
-                .clip(RoundedCornerShape(4.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+            modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant)
         )
     }
 }
 
-// The cover lives in res/drawable, not in the database, because drawable ids change between builds.
 private fun coverFor(title: String): Int? = when (title) {
     "Introduction to Information Systems" -> R.drawable.cover_intro_information_systems
     "Python Crash Course" -> R.drawable.cover_python_crash_course
